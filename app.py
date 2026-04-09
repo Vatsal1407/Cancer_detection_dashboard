@@ -373,7 +373,7 @@ with st.sidebar:
     page = st.radio(
         "Navigation",
         ["🏠 Overview", "📊 Model Comparison", "🔍 Deep Dive",
-         "🎯 Best Model: ViT", "📈 Metric Explorer"],
+         "🎯 Best Model: ViT"],
         label_visibility="collapsed"
     )
     st.markdown("---")
@@ -813,87 +813,6 @@ elif page == "🎯 Best Model: ViT":
                 </div>
                 <div class="cc-val">{val}</div>
             </div>""", unsafe_allow_html=True)
-
-# ════════════════════════════════════════════════════════════════════════════════
-# PAGE — Metric Explorer
-# ════════════════════════════════════════════════════════════════════════════════
-elif page == "📈 Metric Explorer":
-    st.markdown(hero(
-        "Metric <em>Explorer</em>",
-        "Interactive exploration of any metric × model × magnification combination"
-    ), unsafe_allow_html=True)
-
-    active   = require_models()
-    cur_mags = active_mags()   # FIX: filtered magnifications
-
-    # Heatmap — FIX: respect model + mag filters
-    st.markdown(sh(f"Heatmap — {METRIC_LABELS[sel_metric]}"), unsafe_allow_html=True)
-    hz = [[DATA["models"][m][mag][sel_metric] * 100
-           for mag in cur_mags] for m in active]
-    cs_map = {
-        "recall":    [[0, "#1f0505"], [0.3, "#7b1f1f"], [0.6, "#c53030"], [1.0, "#fc8181"]],
-        "precision": [[0, "#02060f"], [0.3, "#0a3a4f"], [0.6, "#0e7490"], [1.0, "#22d3ee"]],
-        "auc_roc":   [[0, "#02060f"], [0.3, "#1a2d3d"], [0.6, "#2563eb"], [1.0, "#93c5fd"]],
-        "f1_score":  [[0, "#0d0a02"], [0.3, "#3d2b00"], [0.6, "#ca8a04"], [1.0, "#fbbf24"]],
-        "accuracy":  [[0, "#060202"], [0.3, "#3d1515"], [0.6, "#7c3aed"], [1.0, "#a78bfa"]],
-    }
-    fig_hm = go.Figure(go.Heatmap(
-        z=hz, x=cur_mags, y=active,
-        colorscale=cs_map.get(sel_metric, cs_map["accuracy"]),
-        text=[[f"{v:.2f}%" for v in row] for row in hz],
-        texttemplate="%{text}",
-        textfont=dict(size=12, color="white", family=_MONO),
-        showscale=True,
-        colorbar=dict(
-            tickformat=".0f", ticksuffix="%",
-            outlinecolor="rgba(34,211,238,0.15)", outlinewidth=1,
-            tickfont=dict(color="#2d4562", family=_MONO, size=9)
-        )
-    ))
-    fig_hm.update_layout(make_layout(
-        title=dict(text=f"{METRIC_LABELS[sel_metric]} — Selected Models × Magnifications",
-                   font=dict(color="#5d7a99", size=13)),
-        xaxis=xax(title="Magnification"),
-        yaxis=yax(),
-        height=295,
-    ))
-    st.plotly_chart(fig_hm, use_container_width=True)
-
-    # Box plot — FIX: rgba fillcolor instead of 8-char hex; use filtered mags
-    st.markdown(sh(f"Score Distribution — {METRIC_LABELS[sel_metric]}"), unsafe_allow_html=True)
-    fig_b = go.Figure()
-    for m in active:
-        vals = [DATA["models"][m][mag][sel_metric] * 100 for mag in cur_mags]
-        fig_b.add_trace(go.Box(
-            y=vals, name=m,
-            marker_color=MODEL_COLORS[m],
-            line_color=MODEL_COLORS[m],
-            # FIX: rgba() instead of 8-char hex — Plotly does not accept #rrggbbAA
-            fillcolor=hex_to_rgba(MODEL_COLORS[m], 0.13),
-            boxmean='sd',
-            boxpoints="all", jitter=0.35, pointpos=-1.5,
-            marker=dict(size=9, line=dict(color="white", width=1)),
-        ))
-    fig_b.update_layout(make_layout(
-        title=dict(text=f"{METRIC_LABELS[sel_metric]} Distribution (selected magnifications)",
-                   font=dict(color="#5d7a99", size=13)),
-        xaxis=xax(),
-        yaxis=yax(title=f"{METRIC_LABELS[sel_metric]} (%)"),
-        height=420, legend=_LEG_V,
-    ))
-    st.plotly_chart(fig_b, use_container_width=True)
-
-    # Full results table — FIX: respect both filters
-    st.markdown(sh("Complete Results Table"), unsafe_allow_html=True)
-    all_rows = []
-    for m in active:
-        for mag in cur_mags:
-            d = DATA["models"][m][mag]
-            all_rows.append({
-                "Model": m, "Mag": mag,
-                **{METRIC_LABELS[k]: pct(d[k]) for k in METRICS}
-            })
-    st.dataframe(pd.DataFrame(all_rows), use_container_width=True, hide_index=True)
 
 # ─── Footer ──────────────────────────────────────────────────────────────────────
 st.markdown("""
