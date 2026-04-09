@@ -418,8 +418,7 @@ if page == "🏠 Overview":
         "Multi-Model · Multi-Magnification · Breast Histopathology Binary Classification",
         [("ViT · ResNet-50 · DenseNet-121 · EfficientNet", "c"),
          ("40X · 100X · 200X · 400X", "p"),
-         ("BreaKHis v1", "g"),
-         ("Review-2 · 2025", "o")]
+         ("BreaKHis v1", "g")]
     ), unsafe_allow_html=True)
 
     # KPI Row
