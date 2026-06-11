@@ -373,7 +373,7 @@ with st.sidebar:
     page = st.radio(
         "Navigation",
         ["🏠 Overview", "📊 Model Comparison", "🔍 Deep Dive",
-         "🎯 Best Model: ViT", "📈 Metric Explorer"],
+         "🎯 Best Model: ViT", "📈 Metric Explorer",
          "🎯 Best Model: ViT"],
         label_visibility="collapsed"
     )
